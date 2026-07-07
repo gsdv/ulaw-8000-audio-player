@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generate samples/tone-440hz.ulaw_8000: 2s of 440 Hz sine with fade in/out,
-encoded as raw G.711 mu-law at 8000 Hz mono."""
+"""Generate samples/tone-440hz.ulaw_8000 and samples/tone-440hz.alaw:
+2s of 440 Hz sine with fade in/out, encoded as raw G.711 at 8000 Hz mono."""
 import math
 import os
 
@@ -25,21 +25,46 @@ def linear_to_ulaw(sample):
     return ~(sign | (exponent << 4) | mantissa) & 0xFF
 
 
+# Segment upper bounds for A-law compression (classic Sun g711.c tables).
+ALAW_SEG_END = [0xFF, 0x1FF, 0x3FF, 0x7FF, 0xFFF, 0x1FFF, 0x3FFF, 0x7FFF]
+
+
+def linear_to_alaw(sample):
+    """Encode a 16-bit signed sample to G.711 A-law (ITU-T standard).
+    Unlike mu-law, the sign bit set means positive, and the whole byte is
+    XORed with 0x55."""
+    if sample >= 0:
+        mask = 0xD5
+    else:
+        mask = 0x55
+        sample = -sample - 8
+    seg = next((i for i, end in enumerate(ALAW_SEG_END) if sample <= end), 8)
+    if seg >= 8:
+        return 0x7F ^ mask
+    aval = seg << 4
+    shift = 4 if seg < 2 else seg + 3
+    aval |= (sample >> shift) & 0x0F
+    return aval ^ mask
+
+
 def main():
     n = int(SAMPLE_RATE * DURATION_S)
     fade_n = int(SAMPLE_RATE * FADE_S)
-    out = bytearray(n)
+    ulaw_out = bytearray(n)
+    alaw_out = bytearray(n)
     for i in range(n):
         envelope = min(1.0, i / fade_n, (n - 1 - i) / fade_n)
         value = AMPLITUDE * envelope * math.sin(2 * math.pi * FREQ_HZ * i / SAMPLE_RATE)
-        out[i] = linear_to_ulaw(int(value * 32124))
+        ulaw_out[i] = linear_to_ulaw(int(value * 32124))
+        alaw_out[i] = linear_to_alaw(int(value * 32256))
 
     out_dir = os.path.join(os.path.dirname(__file__), "..", "samples")
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "tone-440hz.ulaw_8000")
-    with open(out_path, "wb") as f:
-        f.write(out)
-    print(f"wrote {out_path} ({len(out)} bytes, {DURATION_S}s)")
+    for name, data in [("tone-440hz.ulaw_8000", ulaw_out), ("tone-440hz.alaw", alaw_out)]:
+        out_path = os.path.join(out_dir, name)
+        with open(out_path, "wb") as f:
+            f.write(data)
+        print(f"wrote {out_path} ({len(data)} bytes, {DURATION_S}s)")
 
 
 if __name__ == "__main__":
