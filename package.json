@@ -5,6 +5,11 @@
   "description": "Play raw G.711 μ-law 8 kHz audio files (.ulaw_8000, .ulaw, .mulaw) directly in VS Code, with a waveform and click-to-seek.",
   "version": "0.1.0",
   "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gsdv/ulaw-8000-audio-player.git"
+  },
   "engines": {
     "vscode": "^1.75.0"
   },
