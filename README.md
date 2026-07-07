@@ -8,7 +8,7 @@ Raw G.711 files (`.ulaw_8000`, `.ulaw`, `.mulaw`, `.alaw`, `.alaw_8000`) are hea
 
 - Opens `*.ulaw_8000`, `*.ulaw`, `*.mulaw`, `*.alaw`, and `*.alaw_8000` files in an audio player (as the default editor)
 - Waveform rendering with played/unplayed coloring, using your editor theme's colors
-- Click the waveform to seek, <kbd>Space</kbd> to play/pause
+- Click the waveform to seek, drag to scrub, digits <kbd>0</kbd>–<kbd>9</kbd> to jump to tenths, <kbd>Space</kbd> to play/pause
 - Zero dependencies, no build step — the G.711 decoding happens in ~25 lines of JavaScript
 
 ## How it works

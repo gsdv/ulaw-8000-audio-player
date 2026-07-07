@@ -3,7 +3,7 @@
   "displayName": "ulaw_8000 and alaw Audio Player",
   "publisher": "GabrieleScottodiVettimo",
   "description": "Play raw G.711 μ-law and A-law 8 kHz audio files (.ulaw_8000, .ulaw, .mulaw, .alaw, .alaw_8000) directly in VS Code, with a waveform and click-to-seek.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "icon": "icon.png",
   "repository": {

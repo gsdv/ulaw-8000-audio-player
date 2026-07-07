@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- Drag the waveform to scrub: playback pauses, the playhead follows the
+  mouse, and release leaves it where you dropped it.
+- Digit keys 0–9 jump the playhead to tenths of the clip (0 = start),
+  preserving the current play/pause state.
+
 ## 0.2.0
 
 - A-law support: `.alaw` and `.alaw_8000` files now decode with the G.711

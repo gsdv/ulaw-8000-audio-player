@@ -239,6 +239,12 @@ function renderPlayerHtml({ fileName, format, base64 }) {
 		if (e.code === 'Space') {
 			e.preventDefault();
 			if (playing) pause(); else play();
+			return;
+		}
+
+		// Digits jump to tenths of the clip (0 = start), preserving play state.
+		if (/^[0-9]$/.test(e.key)) {
+			seek((Number(e.key) / 10) * duration);
 		}
 	});
 
@@ -304,9 +310,48 @@ function renderPlayerHtml({ fileName, format, base64 }) {
 		requestAnimationFrame(draw);
 	}
 
-	canvas.addEventListener('click', function (e) {
+	function timeAtEvent(e) {
 		var rect = canvas.getBoundingClientRect();
-		seek(((e.clientX - rect.left) / rect.width) * duration);
+		var frac = (e.clientX - rect.left) / rect.width;
+		return Math.max(0, Math.min(1, frac)) * duration;
+	}
+
+	// Plain click seeks and preserves play state; dragging scrubs — playback
+	// pauses, the playhead follows the mouse, and release leaves it paused.
+	var dragState = null; // {startX, moved} while the mouse is down on the canvas
+
+	canvas.addEventListener('mousedown', function (e) {
+		if (e.button !== 0) return;
+		e.preventDefault();
+		dragState = { startX: e.clientX, moved: false };
+	});
+
+	document.addEventListener('mousemove', function (e) {
+		if (!dragState) return;
+		if (!dragState.moved) {
+			// A few px of slop so an imprecise click doesn't count as a drag.
+			if (Math.abs(e.clientX - dragState.startX) < 3) return;
+			dragState.moved = true;
+			if (playing) pause();
+		}
+		offset = timeAtEvent(e);
+	});
+
+	document.addEventListener('mouseup', function (e) {
+		if (!dragState) return;
+		var moved = dragState.moved;
+		dragState = null;
+		if (moved) {
+			offset = timeAtEvent(e);
+		} else {
+			seek(timeAtEvent(e));
+		}
+	});
+
+	// If the mouse is released outside the webview we never see the mouseup;
+	// cancel the drag instead of leaving it stuck to the cursor.
+	window.addEventListener('blur', function () {
+		dragState = null;
 	});
 
 	window.addEventListener('resize', resize);
