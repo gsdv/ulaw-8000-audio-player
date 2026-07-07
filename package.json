@@ -1,0 +1,52 @@
+{
+  "name": "ulaw-8000-preview",
+  "displayName": "ulaw_8000 Preview",
+  "description": "Play raw G.711 μ-law 8 kHz audio files (.ulaw_8000, .ulaw, .mulaw) directly in VS Code, with a waveform and click-to-seek.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "ulaw",
+    "mulaw",
+    "u-law",
+    "g711",
+    "audio",
+    "telephony",
+    "player",
+    "waveform"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "ulaw8000Preview.player",
+        "displayName": "μ-law Audio Player",
+        "selector": [
+          {
+            "filenamePattern": "*.ulaw_8000"
+          },
+          {
+            "filenamePattern": "*.ulaw"
+          },
+          {
+            "filenamePattern": "*.mulaw"
+          }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  }
+}
