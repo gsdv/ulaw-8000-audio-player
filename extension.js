@@ -1,4 +1,4 @@
-// ulaw_8000 Preview — a read-only custom editor that plays raw G.711 μ-law
+// ulaw_8000 Audio Player — a read-only custom editor that plays raw G.711 μ-law
 // 8 kHz mono audio files. The whole extension is dependency-free: the file's
 // bytes are embedded into the webview as base64 and decoded to PCM there.
 const path = require('path');
@@ -8,7 +8,7 @@ const vscode = require('vscode');
 function activate(context) {
 	context.subscriptions.push(
 		vscode.window.registerCustomEditorProvider(
-			'ulaw8000Preview.player',
+			'ulaw8000AudioPlayer.player',
 			new UlawPlayerProvider(),
 			{
 				supportsMultipleEditorsPerDocument: true,

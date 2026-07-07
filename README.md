@@ -1,4 +1,4 @@
-# ulaw_8000 Preview
+# ulaw_8000 Audio Player
 
 Play raw **G.711 μ-law** telephone audio directly in VS Code — with a waveform, click-to-seek, and keyboard play/pause.
 
@@ -26,7 +26,7 @@ To regenerate the sample file: `python3 scripts/make_test_tone.py`.
 Requires Node.js:
 
 ```bash
-npx @vscode/vsce package    # produces ulaw-8000-preview-x.y.z.vsix
+npx @vscode/vsce package    # produces ulaw-8000-audio-player-x.y.z.vsix
 npx @vscode/vsce publish    # after `npx @vscode/vsce login <publisher>`
 ```
 
