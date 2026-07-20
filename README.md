@@ -1,19 +1,19 @@
 # ulaw_8000 and alaw Audio Player
 
-Play raw **G.711 μ-law and A-law** telephone audio directly in VS Code — with a waveform, click-to-seek, and keyboard play/pause.
+Play raw **G.711 μ-law and A-law** telephone audio — plus raw **16-bit PCM** — directly in VS Code, with a waveform, click-to-seek, and keyboard play/pause.
 
-Raw G.711 files (`.ulaw_8000`, `.ulaw`, `.mulaw`, `.alaw`, `.alaw_8000`) are headerless: they're just 8-bit companded samples at 8000 Hz, mono — the format telephony systems (e.g. Twilio media streams) speak natively. μ-law is the North American / Japanese variant, A-law the European one. Nothing on a normal desktop opens them, and even `ffplay` needs the format spelled out. This extension makes them click-to-play.
+Raw G.711 files (`.ulaw_8000`, `.ulaw`, `.mulaw`, `.alaw`, `.alaw_8000`) are headerless: they're just 8-bit companded samples at 8000 Hz, mono — the format telephony systems (e.g. Twilio media streams) speak natively. μ-law is the North American / Japanese variant, A-law the European one. `.pcm_8000` files are the uncompressed cousin: headerless signed 16-bit little-endian PCM at 8000 Hz, mono. Nothing on a normal desktop opens any of these, and even `ffplay` needs the format spelled out. This extension makes them click-to-play.
 
 ## Features
 
-- Opens `*.ulaw_8000`, `*.ulaw`, `*.mulaw`, `*.alaw`, and `*.alaw_8000` files in an audio player (as the default editor)
+- Opens `*.ulaw_8000`, `*.ulaw`, `*.mulaw`, `*.alaw`, `*.alaw_8000`, and `*.pcm_8000` files in an audio player (as the default editor)
 - Waveform rendering with played/unplayed coloring, using your editor theme's colors
 - Click the waveform to seek, drag to scrub, digits <kbd>0</kbd>–<kbd>9</kbd> to jump to tenths, <kbd>Space</kbd> to play/pause
 - Zero dependencies, no build step — the G.711 decoding happens in ~25 lines of JavaScript
 
 ## How it works
 
-The file's bytes are decoded with the standard ITU-T G.711 expansion (μ-law or A-law, chosen by file extension) into PCM, loaded into a Web Audio `AudioBuffer` at 8000 Hz, and played in the editor webview. Since the format is fixed by convention (8-bit companded, 8 kHz, mono), no header is needed — the file extension is the format declaration.
+The file's bytes are decoded with the standard ITU-T G.711 expansion (μ-law or A-law, chosen by file extension) into PCM — or, for `.pcm_8000`, read directly as signed 16-bit little-endian samples — loaded into a Web Audio `AudioBuffer` at 8000 Hz, and played in the editor webview. Since the format is fixed by convention, no header is needed — the file extension is the format declaration.
 
 ## Development
 

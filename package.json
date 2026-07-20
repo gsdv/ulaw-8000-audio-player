@@ -2,8 +2,8 @@
   "name": "ulaw-8000-audio-player",
   "displayName": "ulaw_8000 and alaw Audio Player",
   "publisher": "GabrieleScottodiVettimo",
-  "description": "Play raw G.711 μ-law and A-law 8 kHz audio files (.ulaw_8000, .ulaw, .mulaw, .alaw, .alaw_8000) directly in VS Code, with a waveform and click-to-seek.",
-  "version": "0.3.0",
+  "description": "Play raw G.711 μ-law and A-law 8 kHz audio files (.ulaw_8000, .ulaw, .mulaw, .alaw, .alaw_8000) and raw 16-bit PCM (.pcm_8000) directly in VS Code, with a waveform and click-to-seek.",
+  "version": "0.4.0",
   "license": "MIT",
   "icon": "icon.png",
   "repository": {
@@ -24,6 +24,7 @@
     "alaw",
     "a-law",
     "g711",
+    "pcm",
     "audio",
     "telephony",
     "player",
@@ -35,7 +36,7 @@
     "customEditors": [
       {
         "viewType": "ulaw8000AudioPlayer.player",
-        "displayName": "μ-law / A-law Audio Player",
+        "displayName": "μ-law / A-law / PCM Audio Player",
         "selector": [
           {
             "filenamePattern": "*.ulaw_8000"
@@ -51,6 +52,9 @@
           },
           {
             "filenamePattern": "*.alaw_8000"
+          },
+          {
+            "filenamePattern": "*.pcm_8000"
           }
         ],
         "priority": "default"

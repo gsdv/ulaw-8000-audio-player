@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- Raw 16-bit PCM support: `.pcm_8000` files play as headerless signed
+  little-endian PCM at 8000 Hz mono (the common voice-server cache format).
+
 ## 0.3.0
 
 - Drag the waveform to scrub: playback pauses, the playhead follows the

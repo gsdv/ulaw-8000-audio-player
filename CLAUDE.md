@@ -3,21 +3,22 @@
 ## What this is
 
 A zero-dependency, zero-build VS Code extension that plays raw G.711 telephone
-audio: μ-law (`.ulaw_8000`, `.ulaw`, `.mulaw`) and A-law (`.alaw`, `.alaw_8000`).
-These files are headerless — 8-bit companded samples, 8000 Hz, mono by
-convention — so the file extension is the only format declaration, and the
-player trusts it.
+audio: μ-law (`.ulaw_8000`, `.ulaw`, `.mulaw`) and A-law (`.alaw`, `.alaw_8000`),
+plus raw linear PCM (`.pcm_8000` — signed 16-bit little-endian). These files
+are headerless — 8000 Hz, mono by convention — so the file extension is the
+only format declaration, and the player trusts it.
 
 ## Architecture
 
 Everything lives in `extension.js`:
 
-- A `CustomReadonlyEditorProvider` registered for the five filename patterns
+- A `CustomReadonlyEditorProvider` registered for the six filename patterns
   (`priority: "default"`, so it IS the editor for these files).
-- `resolveCustomEditor` reads the file bytes, picks `mulaw` or `alaw` from the
-  file extension, and embeds the bytes as base64 into the webview HTML.
-- The webview decodes G.711 → Float32 PCM via a 256-entry lookup table, plays
-  through a Web Audio `AudioBuffer` at 8000 Hz, and draws a canvas waveform.
+- `resolveCustomEditor` reads the file bytes, picks `mulaw`, `alaw`, or `pcm16`
+  from the file extension, and embeds the bytes as base64 into the webview HTML.
+- The webview decodes G.711 → Float32 PCM via a 256-entry lookup table (or
+  reads `.pcm_8000` bytes directly as s16le), plays through a Web Audio
+  `AudioBuffer` at 8000 Hz, and draws a canvas waveform.
 
 Constraints to preserve when editing:
 

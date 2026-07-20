@@ -1,5 +1,6 @@
 // ulaw_8000 and alaw Audio Player — a read-only custom editor that plays raw
-// G.711 μ-law and A-law 8 kHz mono audio files. The whole extension is
+// G.711 μ-law and A-law 8 kHz mono audio files, plus raw 16-bit signed
+// little-endian PCM at the same rate (.pcm_8000). The whole extension is
 // dependency-free: the file's bytes are embedded into the webview as base64
 // and decoded to PCM there.
 const path = require('path');
@@ -33,7 +34,9 @@ class UlawPlayerProvider {
 		webviewPanel.webview.options = { enableScripts: true };
 		webviewPanel.webview.html = renderPlayerHtml({
 			fileName,
-			format: /\.alaw(_8000)?$/i.test(fileName) ? 'alaw' : 'mulaw',
+			format: /\.alaw(_8000)?$/i.test(fileName) ? 'alaw'
+				: /\.pcm_8000$/i.test(fileName) ? 'pcm16'
+				: 'mulaw',
 			base64: Buffer.from(bytes).toString('base64'),
 		});
 	}
@@ -136,44 +139,59 @@ function renderPlayerHtml({ fileName, format, base64 }) {
 
 	var SAMPLE_RATE = 8000;
 
-	// ---- Decode base64 -> G.711 bytes -> Float32 PCM ----
+	// ---- Decode base64 -> raw bytes -> Float32 PCM ----
 	var dataEl = document.getElementById('audio-data');
-	var isAlaw = dataEl.dataset.format === 'alaw';
+	var format = dataEl.dataset.format;
+	var isAlaw = format === 'alaw';
+	var isPcm16 = format === 'pcm16';
 	var b64 = dataEl.textContent.trim();
 	var bin = atob(b64);
-	var g711Bytes = new Uint8Array(bin.length);
-	for (var i = 0; i < bin.length; i++) g711Bytes[i] = bin.charCodeAt(i);
+	var rawBytes = new Uint8Array(bin.length);
+	for (var i = 0; i < bin.length; i++) rawBytes[i] = bin.charCodeAt(i);
 
-	// G.711 expansion, ITU-T standard. Peak magnitude is 32124 for mu-law,
-	// 32256 for A-law. Note the opposite sign conventions: mu-law's set sign
-	// bit means negative, A-law's (after the 0x55 toggle) means positive.
-	var table = new Float32Array(256);
-	for (var u = 0; u < 256; u++) {
-		if (isAlaw) {
-			var a = u ^ 0x55;
-			var aExponent = (a >> 4) & 0x07;
-			var aMantissa = a & 0x0f;
-			var aMagnitude = aExponent === 0
-				? (aMantissa << 4) + 8
-				: ((aMantissa << 4) + 0x108) << (aExponent - 1);
-			table[u] = (a & 0x80 ? aMagnitude : -aMagnitude) / 32256;
-		} else {
-			var x = ~u & 0xff;
-			var exponent = (x >> 4) & 0x07;
-			var mantissa = x & 0x0f;
-			var magnitude = (((mantissa << 3) + 0x84) << exponent) - 0x84;
-			table[u] = (x & 0x80 ? -magnitude : magnitude) / 32124;
+	var samples;
+	if (isPcm16) {
+		// Raw 16-bit signed little-endian PCM; a trailing odd byte is ignored.
+		var count = rawBytes.length >> 1;
+		samples = new Float32Array(count);
+		for (var p = 0; p < count; p++) {
+			var v = rawBytes[2 * p] | (rawBytes[2 * p + 1] << 8);
+			if (v >= 0x8000) v -= 0x10000;
+			samples[p] = v / 32768;
 		}
-	}
+	} else {
+		// G.711 expansion, ITU-T standard. Peak magnitude is 32124 for mu-law,
+		// 32256 for A-law. Note the opposite sign conventions: mu-law's set sign
+		// bit means negative, A-law's (after the 0x55 toggle) means positive.
+		var table = new Float32Array(256);
+		for (var u = 0; u < 256; u++) {
+			if (isAlaw) {
+				var a = u ^ 0x55;
+				var aExponent = (a >> 4) & 0x07;
+				var aMantissa = a & 0x0f;
+				var aMagnitude = aExponent === 0
+					? (aMantissa << 4) + 8
+					: ((aMantissa << 4) + 0x108) << (aExponent - 1);
+				table[u] = (a & 0x80 ? aMagnitude : -aMagnitude) / 32256;
+			} else {
+				var x = ~u & 0xff;
+				var exponent = (x >> 4) & 0x07;
+				var mantissa = x & 0x0f;
+				var magnitude = (((mantissa << 3) + 0x84) << exponent) - 0x84;
+				table[u] = (x & 0x80 ? -magnitude : magnitude) / 32124;
+			}
+		}
 
-	var samples = new Float32Array(g711Bytes.length);
-	for (var s = 0; s < g711Bytes.length; s++) samples[s] = table[g711Bytes[s]];
+		samples = new Float32Array(rawBytes.length);
+		for (var s = 0; s < rawBytes.length; s++) samples[s] = table[rawBytes[s]];
+	}
 
 	var duration = samples.length / SAMPLE_RATE;
 
 	document.getElementById('meta').textContent =
-		(isAlaw ? 'G.711 A-law' : 'G.711 μ-law') + ' · 8000 Hz · mono · ' +
-		formatBytes(g711Bytes.length) + ' · ' + formatTime(duration);
+		(isAlaw ? 'G.711 A-law' : isPcm16 ? '16-bit PCM (little-endian)' : 'G.711 μ-law') +
+		' · 8000 Hz · mono · ' +
+		formatBytes(rawBytes.length) + ' · ' + formatTime(duration);
 
 	// ---- Playback (Web Audio) ----
 	var audioCtx = null;
