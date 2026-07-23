@@ -88,8 +88,9 @@ Checklist for a release:
 8. Optionally install locally: `code --install-extension <file>.vsix`
    (open windows then show "Restart Required" — expected).
 
-Token handling: tokens are never stored in this repo or in config. Ask Gab for
-fresh ones at publish time; he rotates them afterwards. Marketplace listing
+Token handling: the publishing PATs live in the untracked `.env` file at the
+repo root (`VSCE_PAT` for the Microsoft Marketplace, `OVSX_PAT` for Open VSX),
+ready to be used whenever a release is made. Marketplace listing
 identity: the extension ID `GabrieleScottodiVettimo.ulaw-8000-audio-player` is
 permanent (changing `name`/`publisher` would create a new, separate listing and
 orphan existing installs); only `displayName` is safely renameable.
