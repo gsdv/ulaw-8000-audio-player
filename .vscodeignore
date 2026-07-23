@@ -4,3 +4,4 @@ scripts/**
 samples/**
 *.vsix
 CLAUDE.md
+.env
